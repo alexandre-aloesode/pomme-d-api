@@ -232,4 +232,76 @@ abstract class AbstractModel
 
         $queryDeleteOne->execute($params);
     }
+
+    public function buildGet($fields, $params)
+    {
+        $selectedFields = [];
+        $where = [];
+        if (count($params) == 0) {
+            $sql = "SELECT * FROM " . $this->tableName;
+        } else {
+            foreach ($params as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $selectedFields[] = $key;
+                    if ($value != '') {
+                        $where[] = $key . ' = :' . $key;
+                    }
+                }
+            }
+            $where = implode(' AND ', $where);
+            $sql = $where == '' ?
+                "SELECT " . implode(', ', $selectedFields) . " FROM " . $this->tableName
+                :
+                "SELECT " . implode(', ', $selectedFields) . " FROM " . $this->tableName . " WHERE " . $where;
+        }
+        return $sql;
+    }
+
+    public function buildPost($params) {
+        $fields = [];
+        $values = [];
+        foreach ($params as $key => $value) {
+            if ($value != '') {
+                $fields[] = $key;
+                $values[] = ':' . $key;
+            }
+        }
+        $fields = implode(', ', $fields);
+        $values = implode(', ', $values);
+        $sql = "INSERT INTO " . $this->tableName . " (" . $fields . ") VALUES (" . $values . ")";
+        return $sql;
+    }
+
+    public function buildPut($fields, $params) {
+        $set = [];
+        $where = [];
+        foreach ($params as $key => $value) {
+            if (in_array($key, $fields)) {
+                if ($value != '') {
+                    $set[] = $key . ' = :' . $key;
+                }
+                else {
+                    $where[] = $key . ' = :' . $key;
+                }
+            }
+        }
+        $set = implode(', ', $set);
+        $where = implode(' AND ', $where);
+        $sql = "UPDATE " . $this->tableName . " SET " . $set . " WHERE " . $where;
+        return $sql;
+    }
+
+    public function buildExecute($params)
+    {
+        $execute = [];
+        foreach ($params as $key => $value) {
+            if ($value != '') {
+                $execute[':' . $key] = $value;
+            }
+        }
+        if (count($execute) == 0) {
+            $execute = null;
+        }
+        return $execute;
+    }
 }

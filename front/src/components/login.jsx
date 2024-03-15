@@ -1,29 +1,28 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { Button, TextField } from "@mui/material";
+import { dbPost } from "../api/database.jsx";
+import { UserContextProvider } from "../context/userContext";
+import { UserContext } from "../context/userContext";
+import NavBar from "./navBar.jsx";
 
 function UserLogin() {
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [message, setMessage] = React.useState("tarace");
+  const [message, setMessage] = React.useState("");
+  const { login } = React.useContext(UserContext);
 
-  function handleLogin() {
+  async function handleLogin() {
     const userData = new FormData();
     userData.append("email", email);
     userData.append("password", password);
-    fetch("http://localhost/pomme-d-api/back/login", {
-      method: "POST",
-      body: userData,
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-       if(data.success === true){
-         setMessage(data.message);
-       }
-      });
+    
+    const request = await dbPost("login", userData);
+    setMessage(request.message);
+    if (request.success === true) {
+      login(request.user, request.token);
+    }
   }
 
   return (

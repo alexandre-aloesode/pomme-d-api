@@ -1,7 +1,12 @@
 <?php
+
 namespace App\Controller;
+require_once 'vendor/autoload.php';
 use App\Model\User_Model;
+use App\Helper\Token_Helper;
+
 require_once '/var/www/html/pomme-d-api/back/src/model/User_Model.php';
+require_once '/var/www/html/pomme-d-api/back/src/helpers/token_helper.php';
 
 class Auth_Controller
 {
@@ -18,7 +23,32 @@ class Auth_Controller
 
     public function login()
     {
-        echo json_encode('login');
+        $user = new User_Model();
+        $checkExistingUser = $user->readOneByString('email', $this->email);
+        if ($checkExistingUser) {
+            if (password_verify($this->password, $checkExistingUser[0]['password'])) {
+                $payload = [
+                    'id' => $checkExistingUser[0]['id'],
+                    'email' => $checkExistingUser[0]['email'],
+                    'role' => $checkExistingUser[0]['role']
+                ];
+                $token = new Token_Helper();
+                $jwt = $token->generateToken($payload);
+                echo json_encode([
+                    'success' => true, 
+                    'token' => $jwt,
+                    'user' => $payload,
+                    'message' => 'Connexion réussie'
+                ]);
+                return;
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Mot de passe incorrect']);
+                return;
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Informations incorrectes']);
+            return;
+        }
     }
 
     public function login_post()
@@ -39,19 +69,14 @@ class Auth_Controller
         $register = new User_Model();
         $mail_already_exist = $register->readOnebyString('email', $this->email);
         if ($mail_already_exist) {
-            echo json_encode(['success' =>false, 'message' => 'Cet email existe déjà']);
+            echo json_encode(['success' => false, 'message' => 'Cet email existe déjà']);
         } else {
             $register->createOne([
                 ':email' => $this->email,
                 ':password' => password_hash($this->password, PASSWORD_DEFAULT),
                 ':role' => 'user'
             ]);
-            echo json_encode(['success' =>true, 'message' => 'Utilisateur créé avec succès']);
+            echo json_encode(['success' => true, 'message' => 'Utilisateur créé avec succès']);
         }
-
-    }
-
-    public function register_post()
-    {
     }
 }

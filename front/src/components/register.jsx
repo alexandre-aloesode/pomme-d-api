@@ -1,26 +1,22 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { Button, TextField } from "@mui/material";
+import { dbPost } from "../api/database.jsx";
+import NavBar from "./navBar.jsx";
 
 function UserRegister() {
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
-  function handleRegister() {
+  async function handleRegister() {
     const userData = new FormData();
     userData.append("email", email);
-    userData.append("password", password);
-    fetch("http://localhost/pomme-d-api/back/register", {
-      method: "POST",
-      body: userData,
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-      });
+    userData.append("password", password)
+    
+    const request = await dbPost("register", userData);
+    setMessage(request.message);
   }
 
   return (
@@ -55,6 +51,8 @@ function UserRegister() {
       <Button variant="contained" onClick={handleRegister}>
         Register
       </Button>
+      <div>
+        <p>{message}</p></div>
     </Box>
   );
 }

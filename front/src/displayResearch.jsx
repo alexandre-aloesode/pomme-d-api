@@ -1,14 +1,15 @@
 import React from "react";
-import { networkGet } from "./api/network";
+import { networkGetProduct } from "./api/network";
 import NavBar from "./components/navBar";
 
-function ProductList() {
+function DisplayResearch() {
   const [allProducts, setAllProducts] = React.useState([]);
   const [filteredProducts, setFilteredProducts] = React.useState([]);
   const [search, setSearch] = React.useState("");
 
   React.useEffect(() => {
-    networkGet("search").then((data) => {
+    const search = window.location.href.split("/")[4];
+    networkGetProduct(search).then((data) => {
       setAllProducts(data);
     });
   }, []);
@@ -17,7 +18,6 @@ function ProductList() {
     {
       allProducts?.products?.map((product, index) => {
         if (index > 1) return;
-        console.log(product);
       });
     }
   }, [allProducts]);
@@ -44,4 +44,4 @@ function ProductList() {
   );
 }
 
-export default ProductList;
+export default DisplayResearch;

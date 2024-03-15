@@ -142,6 +142,7 @@ class AltoRouter {
 
 		$params = array();
 		$match = false;
+
 		// set Request Url if it isn't passed as parameter
 		if($requestUrl === null) {
 			$requestUrl = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
@@ -166,6 +167,7 @@ class AltoRouter {
 
 		foreach($this->routes as $handler) {
 			list($method, $_route, $target, $name) = $handler;
+
 			$methods = explode('|', $method);
 			$method_match = false;
 
@@ -216,6 +218,7 @@ class AltoRouter {
 			}
 
 			if(($match == true || $match > 0)) {
+
 				if($params) {
 					foreach($params as $key => $value) {
 						if(is_numeric($key)) unset($params[$key]);
